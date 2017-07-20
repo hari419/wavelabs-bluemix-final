@@ -124,28 +124,55 @@ $scope.contented = function(prod){
    
   $scope.welcomeUser = null;
   $scope.accesstoken = null;
+  $scope.final_token = null;
   $scope.user = {};
   $scope.reg_user={};
 
-        $scope.register = function() {
+var jsondata = {
+    "client_id" : "b88f5f8b-5585-4b0b-91e8-e752fec907af",
+    "client_secret" : "wavelabs-bluemix-console",
+    "grant_type" : "client_credentials",
+    "Content-Type" : "x-www-form-urlencoded"  
+}
+
+
+$scope.generate = function(){
+  $http({
+          method  : 'POST',
+          url     : 'http://api.qa1.nbos.in/oauth/token',
+          params  : jsondata,
+          headers : {
+            "Accept" : "application/json" } 
+         })
+          .then(function myFunction(response) {            
+            $scope.access1 = response.data.access_token;
+            $scope.access2 = response.data.token_type;
+            
+            $scope.final_token = $scope.access2 + " " + $scope.access1;
+            console.log($scope.final_token);
+          });
+}
+
+$scope.register = function() {
         $http({
           method  : 'POST',
           url     : 'http://api.qa1.nbos.in/api/identity/v0/users/signup',
           data    : $scope.reg_user,
-          headers : {'Authorization': 'Bearer 899ebd18-da5d-499e-9034-9d98ad370ced'} 
+          headers : {'Authorization': $scope.final_token} 
          })
           .then(function myFunction() {
             $state.go("login");
           });
         };
-  $scope.loginclass = true;
+        $scope.loginclass = true;
+
 
 $scope.login = function(){  
   $http({
           method  : 'POST',
           url     : 'http://api.qa1.nbos.in/api/identity/v0/auth/login',
           data    : $scope.user,
-          headers : {'Authorization': 'Bearer 899ebd18-da5d-499e-9034-9d98ad370ced'} 
+          headers : {'Authorization': $scope.final_token} 
          })
           .then(function myFunction(response) {
             $scope.welcomeUser = "Hi.." + (response.data.member.firstName + response.data.member.lastName);
@@ -176,6 +203,7 @@ $scope.init = function(){
         $scope.starters.push($scope.products[i]);
       };
     };
+$scope.generate();
 };
 $scope.init();
 
